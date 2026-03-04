@@ -1,0 +1,19 @@
+# Dependencies — these are downloaded, not written by you
+node_modules/
+
+# Environment variables — contain secrets, never go to GitHub
+.env
+.env.local
+.env.production
+
+# Database file — too large, regenerated from seed data
+*.db
+*.sqlite
+
+# Build output
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
