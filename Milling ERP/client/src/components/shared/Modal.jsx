@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
 const sizeClasses = {
   sm: 'max-w-md',
@@ -7,15 +7,8 @@ const sizeClasses = {
 };
 
 function Modal({ isOpen, onClose, title, children, size = 'md' }) {
-  const [visible, setVisible] = useState(false);
-
   useEffect(() => {
-    if (!isOpen) {
-      setVisible(false);
-      return;
-    }
-
-    setVisible(true);
+    if (!isOpen) return;
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
@@ -29,24 +22,21 @@ function Modal({ isOpen, onClose, title, children, size = 'md' }) {
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) {
-    return null;
-  }
-
   const panelSize = sizeClasses[size] ?? sizeClasses.md;
 
   return (
     <div
       className={`fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-opacity duration-200 ${
-        visible ? 'opacity-100' : 'opacity-0'
+        isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`}
-      onClick={onClose}
-      aria-modal="true"
+      onClick={isOpen ? onClose : undefined}
+      aria-modal={isOpen ? 'true' : undefined}
+      aria-hidden={isOpen ? undefined : 'true'}
       role="dialog"
     >
       <div
         className={`relative w-full ${panelSize} transform rounded-xl bg-white p-6 shadow-xl transition-all duration-200 ease-out ${
-          visible ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+          isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         }`}
         onClick={(e) => e.stopPropagation()}
       >
