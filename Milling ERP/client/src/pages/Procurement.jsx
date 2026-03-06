@@ -3,6 +3,7 @@ import { Plus, RefreshCcw, Package } from 'lucide-react';
 import {
   createProcurement,
   getProcurement,
+  getSilos,
 } from '../services/api.js';
 import Button from '../components/shared/Button.jsx';
 import LoadingSpinner from '../components/shared/LoadingSpinner.jsx';
@@ -31,6 +32,12 @@ function progressColor(pct) {
   if (pct > 70) return 'bg-emerald-500';
   if (pct >= 40) return 'bg-amber-500';
   return 'bg-red-500';
+}
+
+function siloFillColor(pctFull) {
+  if (pctFull > 90) return 'bg-red-500';
+  if (pctFull >= 70) return 'bg-amber-500';
+  return 'bg-emerald-500';
 }
 
 function NewOrderModal({ isOpen, onClose, onCreated }) {
@@ -255,6 +262,7 @@ function NewOrderModal({ isOpen, onClose, onCreated }) {
 
 export default function Procurement() {
   const [records, setRecords] = useState([]);
+  const [silos, setSilos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -265,8 +273,12 @@ export default function Procurement() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getProcurement();
-      setRecords(Array.isArray(data) ? data : []);
+      const [procurementData, siloData] = await Promise.all([
+        getProcurement(),
+        getSilos(),
+      ]);
+      setRecords(Array.isArray(procurementData) ? procurementData : []);
+      setSilos(Array.isArray(siloData) ? siloData : []);
     } catch (err) {
       setError(err);
     } finally {
@@ -455,6 +467,76 @@ export default function Procurement() {
           </table>
         </div>
       )}
+
+      {/* Silo Storage */}
+      <section className="space-y-3">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-100">
+            Silo Storage Levels
+          </h3>
+          <p className="text-xs text-slate-400">
+            Current fill levels by silo (MT).
+          </p>
+        </div>
+
+        {silos.length === 0 ? (
+          <EmptyState
+            title="No silo records"
+            description="Silo storage levels will appear here once silos are configured."
+            icon={Package}
+          />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {silos.map((s) => {
+              const capacity = Number(s.capacity_mt || 0);
+              const current = Number(s.current_mt || 0);
+              const pctFull = capacity > 0 ? (current / capacity) * 100 : 0;
+              const barClass = siloFillColor(pctFull);
+              const isWarning = pctFull > 90;
+
+              return (
+                <div
+                  key={s.id ?? s.silo_name}
+                  className="relative overflow-hidden rounded-2xl border border-slate-800 bg-[#14110b] p-5"
+                >
+                  <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#c9a84c]/60 via-[#c9a84c]/30 to-transparent" />
+
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-sm font-semibold text-slate-100">
+                        {s.silo_name || 'Silo'}
+                      </div>
+                      <div className="mt-0.5 text-xs text-slate-400">
+                        {s.grain_type || 'Unassigned'}
+                      </div>
+                    </div>
+                    {isWarning && (
+                      <span className="inline-flex items-center rounded-full bg-red-500/15 px-2 py-0.5 text-[11px] font-semibold text-red-300 ring-1 ring-inset ring-red-500/30">
+                        Above 90%
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="mb-1 flex items-center justify-between text-[11px] text-slate-400">
+                      <span>
+                        {Math.round(current)} / {Math.round(capacity)} MT
+                      </span>
+                      <span>{Math.round(pctFull)}%</span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-slate-800">
+                      <div
+                        className={`h-2 rounded-full ${barClass}`}
+                        style={{ width: `${Math.min(100, Math.max(0, pctFull))}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
       <NewOrderModal
         key={formKey}
