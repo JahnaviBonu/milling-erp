@@ -35,7 +35,7 @@ function Batches() {
   const [formKey, setFormKey] = useState(0);
   const [saving, setSaving] = useState(false);
 
-  const load = async () => {
+  const refetch = async () => {
     setLoading(true);
     setError(null);
     try {
@@ -49,7 +49,7 @@ function Batches() {
   };
 
   useEffect(() => {
-    load();
+    refetch();
   }, []);
 
   const filteredBatches = useMemo(() => {
@@ -194,13 +194,13 @@ function Batches() {
       </div>
 
       {error ? (
-        <div className="max-w-xl">
+        <div className="max-w-xl rounded-2xl border border-red-900/50 bg-red-950/20 px-6 py-8">
           <EmptyState
             title="Unable to load batches"
-            description="There was an issue fetching the batch list. Please try again."
+            description={error?.message || 'There was an issue fetching the batch list. Please try again.'}
             icon={RefreshCcw}
-            actionLabel="Retry"
-            onAction={load}
+            actionLabel="Try Again"
+            onAction={refetch}
           />
         </div>
       ) : (

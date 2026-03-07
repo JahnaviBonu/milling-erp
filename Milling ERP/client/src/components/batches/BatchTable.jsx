@@ -2,7 +2,6 @@ import React from 'react';
 import { Edit2, Trash2, ClipboardList } from 'lucide-react';
 import StatusBadge from '../shared/StatusBadge.jsx';
 import Button from '../shared/Button.jsx';
-import LoadingSpinner from '../shared/LoadingSpinner.jsx';
 import EmptyState from '../shared/EmptyState.jsx';
 
 function formatNumber(value, decimals = 1) {
@@ -19,13 +18,47 @@ function extractionClass(rate) {
   return 'text-red-400';
 }
 
+function TableSkeleton() {
+  const rows = 5;
+  const colCount = 9;
+  return (
+    <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-[#14110b]">
+      <table className="min-w-full text-left text-sm">
+        <thead className="border-b border-slate-800 text-xs uppercase tracking-wide text-slate-400">
+          <tr>
+            <th className="px-4 py-3">Batch Number</th>
+            <th className="px-4 py-3">Date</th>
+            <th className="px-4 py-3">Grain Type</th>
+            <th className="px-4 py-3">Input MT</th>
+            <th className="px-4 py-3">Output MT</th>
+            <th className="px-4 py-3">Extraction Rate</th>
+            <th className="px-4 py-3">Grade</th>
+            <th className="px-4 py-3">Status</th>
+            <th className="px-4 py-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-900">
+          {Array.from({ length: rows }).map((_, i) => (
+            <tr key={i}>
+              {Array.from({ length: colCount }).map((_, j) => (
+                <td key={j} className="px-4 py-3">
+                  <span
+                    className="inline-block h-5 min-w-[3rem] rounded bg-slate-700/80 animate-pulse"
+                    style={{ width: j === 0 ? '6rem' : j === colCount - 1 ? '4rem' : '4rem' }}
+                  />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function BatchTable({ batches = [], onEdit, onDelete, loading = false }) {
   if (loading) {
-    return (
-      <div className="flex min-h-[240px] items-center justify-center rounded-2xl border border-slate-800 bg-[#14110b]">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
+    return <TableSkeleton />;
   }
 
   if (!batches || batches.length === 0) {
