@@ -112,7 +112,7 @@ function Dashboard() {
   return (
     <div className="space-y-8">
       {/* KPIs */}
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         <KPICard
           label="Total Input MT"
           value={kpis.total_input_mt?.toFixed(1) ?? '0.0'}
@@ -163,9 +163,9 @@ function Dashboard() {
         />
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-3">
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Monthly throughput chart */}
-        <div className="lg:col-span-2 rounded-2xl border border-slate-800 bg-[#14110b] p-5">
+        <div className="rounded-2xl border border-slate-800 bg-[#14110b] p-5 lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-100">
               Monthly Throughput
