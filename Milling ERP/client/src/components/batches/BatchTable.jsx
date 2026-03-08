@@ -1,4 +1,3 @@
-import React from 'react';
 import { Edit2, Trash2, ClipboardList } from 'lucide-react';
 import StatusBadge from '../shared/StatusBadge.jsx';
 import Button from '../shared/Button.jsx';
@@ -56,7 +55,14 @@ function TableSkeleton() {
   );
 }
 
-function BatchTable({ batches = [], onEdit, onDelete, loading = false }) {
+function BatchTable({
+  batches = [],
+  onEdit,
+  onDelete,
+  loading = false,
+  deletingId = null,
+  newlyAddedId = null,
+}) {
   if (loading) {
     return <TableSkeleton />;
   }
@@ -88,56 +94,85 @@ function BatchTable({ batches = [], onEdit, onDelete, loading = false }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-900">
-          {batches.map((batch) => (
-            <tr key={batch.id} className="hover:bg-slate-900/60">
-              <td className="px-4 py-3 font-medium text-slate-100">
-                {batch.batch_number ?? '-'}
-              </td>
-              <td className="px-4 py-3 text-slate-300">
-                {batch.date ?? '-'}
-              </td>
-              <td className="px-4 py-3 text-slate-300">
-                {batch.grain_type ?? '-'}
-              </td>
-              <td className="px-4 py-3 text-slate-200">
-                {formatNumber(batch.input_mt, 1)}
-              </td>
-              <td className="px-4 py-3 text-slate-200">
-                {formatNumber(batch.output_mt, 1)}
-              </td>
-              <td className={`px-4 py-3 font-medium ${extractionClass(batch.extraction_rate)}`}>
-                {formatNumber(batch.extraction_rate, 1)}%
-              </td>
-              <td className="px-4 py-3 text-slate-300">
-                {batch.grade ?? '-'}
-              </td>
-              <td className="px-4 py-3">
-                <StatusBadge status={batch.status} />
-              </td>
-              <td className="px-4 py-3">
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => onEdit?.(batch)}
-                    className="px-2.5"
-                  >
-                    <Edit2 className="h-4 w-4" aria-hidden="true" />
-                    <span className="sr-only">Edit</span>
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => onDelete?.(batch.id)}
-                    className="px-2.5"
-                  >
-                    <Trash2 className="h-4 w-4" aria-hidden="true" />
-                    <span className="sr-only">Delete</span>
-                  </Button>
-                </div>
-              </td>
-            </tr>
-          ))}
+          {batches.map((batch) => {
+            const isDeleting = deletingId === batch.id;
+            const isNew = newlyAddedId === batch.id;
+
+            return (
+              <tr
+                key={batch.id}
+                className="transition-all duration-500"
+                style={{
+                  opacity: isDeleting ? 0 : 1,
+                  transform: isDeleting ? 'scale(0.98)' : 'scale(1)',
+                  backgroundColor: isNew
+                    ? 'rgba(201, 168, 76, 0.12)'
+                    : undefined,
+                }}
+                onMouseEnter={e => {
+                  if (!isNew) e.currentTarget.style.backgroundColor = 'rgba(148, 163, 184, 0.05)';
+                }}
+                onMouseLeave={e => {
+                  if (!isNew) e.currentTarget.style.backgroundColor = '';
+                }}
+              >
+                <td className="px-4 py-3 font-medium text-slate-100">
+                  {batch.batch_number ?? '-'}
+                  {isNew && (
+                    <span className="ml-2 rounded-full bg-amber-600/20 px-1.5 py-0.5 text-xs text-amber-400">
+                      New
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-3 text-slate-300">
+                  {batch.date ?? '-'}
+                </td>
+                <td className="px-4 py-3 text-slate-300">
+                  {batch.grain_type ?? '-'}
+                </td>
+                <td className="px-4 py-3 text-slate-200">
+                  {formatNumber(batch.input_mt, 1)}
+                </td>
+                <td className="px-4 py-3 text-slate-200">
+                  {formatNumber(batch.output_mt, 1)}
+                </td>
+                <td className={`px-4 py-3 font-medium ${extractionClass(batch.extraction_rate)}`}>
+                  {formatNumber(batch.extraction_rate, 1)}%
+                </td>
+                <td className="px-4 py-3 text-slate-300">
+                  {batch.grade ?? '-'}
+                </td>
+                <td className="px-4 py-3">
+                  <StatusBadge status={batch.status} />
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => onEdit?.(batch)}
+                      className="px-2.5"
+                      disabled={isDeleting}
+                    >
+                      <Edit2 className="h-4 w-4" aria-hidden="true" />
+                      <span className="sr-only">Edit</span>
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => onDelete?.(batch.id)}
+                      className="px-2.5"
+                      disabled={isDeleting}
+                      loading={isDeleting}
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      <span className="sr-only">Delete</span>
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus, RefreshCcw } from 'lucide-react';
 import {
   getBatches,
@@ -35,6 +35,10 @@ function Batches() {
   const [formKey, setFormKey] = useState(0);
   const [saving, setSaving] = useState(false);
 
+  // Micro-interaction state
+  const [deletingId, setDeletingId] = useState(null);
+  const [newlyAddedId, setNewlyAddedId] = useState(null);
+
   const refetch = async () => {
     setLoading(true);
     setError(null);
@@ -54,7 +58,6 @@ function Batches() {
 
   const filteredBatches = useMemo(() => {
     const query = searchText.trim().toLowerCase();
-
     return batches.filter((b) => {
       if (grainTypeFilter && b.grain_type !== grainTypeFilter) return false;
       if (statusFilter && b.status !== statusFilter) return false;
@@ -94,6 +97,9 @@ function Batches() {
       } else {
         const created = await createBatch(formData);
         setBatches((prev) => [created, ...prev]);
+        // Highlight the new row for 2 seconds
+        setNewlyAddedId(created.id);
+        setTimeout(() => setNewlyAddedId(null), 2000);
       }
       closeForm();
     } finally {
@@ -105,20 +111,37 @@ function Batches() {
     const ok = window.confirm('Delete this batch? This action cannot be undone.');
     if (!ok) return;
 
+    // Start fade animation
+    setDeletingId(id);
+
+    // Wait for animation to complete before removing
+    await new Promise(resolve => setTimeout(resolve, 400));
+
     const previous = batches;
     setBatches((prev) => prev.filter((b) => b.id !== id));
+    setDeletingId(null);
 
     try {
       await deleteBatch(id);
-    } catch (err) {
-      // rollback if delete fails
+    } catch {
+      // Rollback if delete fails
       setBatches(previous);
-      throw err;
     }
   };
 
   return (
     <div className="space-y-6">
+      {/* Entrance animation style */}
+      <style>{`
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+          animation: fadeInUp 0.35s ease forwards;
+        }
+      `}</style>
+
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-base font-semibold text-slate-100">Batch Log</h2>
@@ -156,9 +179,7 @@ function Batches() {
           >
             <option value="">All</option>
             {grainTypes.map((gt) => (
-              <option key={gt} value={gt}>
-                {gt}
-              </option>
+              <option key={gt} value={gt}>{gt}</option>
             ))}
           </select>
         </div>
@@ -173,9 +194,7 @@ function Batches() {
           >
             <option value="">All</option>
             {statusOptions.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
+              <option key={s} value={s}>{s}</option>
             ))}
           </select>
         </div>
@@ -209,6 +228,8 @@ function Batches() {
           loading={loading}
           onEdit={openEdit}
           onDelete={handleDelete}
+          deletingId={deletingId}
+          newlyAddedId={newlyAddedId}
         />
       )}
 
@@ -218,9 +239,9 @@ function Batches() {
         onClose={closeForm}
         onSubmit={handleSubmit}
         initialData={editingBatch}
+        saving={saving}
       />
 
-      {/* Prevent double submit while saving */}
       {saving && (
         <div className="fixed inset-0 z-40" aria-hidden="true" />
       )}
