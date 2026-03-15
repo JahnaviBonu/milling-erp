@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 
 const db = require('./database');
+const seed = require('./seed');
 
 const batchesRouter = require('./routes/batches');
 const procurementRouter = require('./routes/procurement');
@@ -103,6 +104,9 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 3001;
 
+// Seed database on startup (safe - only seeds if tables are empty)
+seed();
+
 app.listen(PORT, () => {
-  console.log('Server running on port 3001');
+  console.log('Server running on port ' + PORT);
 });
