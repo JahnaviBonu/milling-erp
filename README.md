@@ -130,11 +130,9 @@ Use **admin@millops.com** / **admin123** (or other seeded users) to access the a
 
 ## 📸 Screenshots
 
-*(Placeholder: add screenshots of Dashboard, Batches, Procurement, Reports, and Login.)*
-
-| Dashboard | Batches | Reports |
-|-----------|---------|---------|
-| *Screenshot 1* | *Screenshot 2* | *Screenshot 3* |
+| Dashboard | Batches | Procurement | Reports |
+|-----------|---------|-------------|---------|
+| ![Dashboard](screenshots/dashboard.png) | ![Batches](screenshots/batch.png) | ![Procurement](screenshots/procurement.png) | ![Reports](screenshots/reports.png) |
 
 ---
 
