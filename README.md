@@ -8,7 +8,7 @@
 
 | | |
 |---|---|
-| **Demo** | [Live Demo](#) *(placeholder: add your deployed URL)* |
+| **Demo** | [Live Demo](https://milling-erp.vercel.app) |
 | **Email** | `admin@millops.com` |
 | **Password** | `admin123` |
 
@@ -83,7 +83,7 @@ cd milling-erp
 ### 2. Backend setup
 
 ```bash
-cd "Milling ERP/server"
+cd server
 npm install
 npm start
 ```
@@ -103,7 +103,7 @@ npm run seed
 In a new terminal:
 
 ```bash
-cd "Milling ERP/client"
+cd client
 npm install
 npm run dev
 ```
